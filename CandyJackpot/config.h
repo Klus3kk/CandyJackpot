@@ -1,4 +1,5 @@
 #pragma once
+#include "inttypes.h"
 
 // Pin Definitions
 const uint8_t buttonPin = 2;
