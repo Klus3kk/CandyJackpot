@@ -8,12 +8,12 @@ static unsigned long lastDebounce = 0;
 static const unsigned long debounceMs = 30;
 
 void initButton() {
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(buttonPin, INPUT_PULLUP);
 }
 
 // returns true **once** with every button press.
 bool buttonPressed() {
-  bool reading = digitalRead(BUTTON_PIN);
+  bool reading = digitalRead(buttonPin);
   bool pressed = false;
 
   // wykrycie zmiany stanu => restart licznika drgań
