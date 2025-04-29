@@ -1,7 +1,7 @@
 #pragma once
 
 // Pin Definitions
-const int leverPin = 2;
+const uint8_t buttonPin = 2;
 const int speakerPin = 3;
 const int dispenserServoPin = 9;
 const int leverServoPin = 10;

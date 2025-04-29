@@ -25,14 +25,20 @@
 // For now, testing the screen 
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 int slotResults[3];
+bool spinning = false;
 
 void setup() {
   initDisplay();
+  initButton();
   // other init
 }
 
 void loop() {
-  spinSlots();
-  displayResult();
-  delay(1000);
+  if (!spinning && buttonPressed()) {
+    spinning = true;
+    spinSlots();
+    displayResult();
+    //delay(1000);
+    spinning = false;     
+  }
 }
