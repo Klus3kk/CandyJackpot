@@ -29,13 +29,17 @@ int slotResults[3];
 void setup() {
   initDisplay();
   initButton();
+  initSound();
   // other init
 }
 
 void loop() {
+  updateSpinSound();
   if (buttonPressed()) {
+    startSpinSound();
     spinSlots();
     displayResult();
+    playLoseSound();
     delay(1000);
   }
 }
