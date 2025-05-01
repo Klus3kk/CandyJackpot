@@ -28,11 +28,14 @@ int slotResults[3];
 
 void setup() {
   initDisplay();
+  initButton();
   // other init
 }
 
 void loop() {
-  spinSlots();
-  displayResult();
-  delay(1000);
+  if (buttonPressed()) {
+    spinSlots();
+    displayResult();
+    delay(1000);
+  }
 }
