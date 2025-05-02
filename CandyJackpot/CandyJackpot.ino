@@ -8,8 +8,9 @@
 #include "symbols.h"
 #include "animation.h"
 #include "lever.h"
-#include "sound.h"
+// Commented out for initial testing
 // #include "dispenser.h"
+// #include "sound.h"
 
 // Create display object
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
@@ -25,25 +26,21 @@ void setup() {
   initConfig();
   initDisplay(); // This calls displaySplashScreen() internally
   initButton();
-  initSound();
   
   // Commented out for initial testing
   // initLever();
   // initDispenser();
+  // initSound();
 }
 
 void loop() {
-  // Update sound effects (needed for continuous sounds)
-  updateSpinSound();
-  
   if (buttonPressed()) {
     // When button is pressed, run the game
     
     // Show lever pull animation
     animateLeverPull();
     
-    // Start spin sound and animate slots
-    startSpinSound();
+    // Spin and stop slots
     spinSlots();
     stopSlotSequentially();
     
@@ -54,10 +51,8 @@ void loop() {
     // Check for win and display appropriate message
     if (checkWin()) {
       playWinAnimation();
-      playWinSound();
     } else {
       displayLoseMessage();
-      playLoseSound();
     }
     
     // Wait before returning to splash screen

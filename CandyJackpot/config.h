@@ -26,6 +26,17 @@ const int THUMBS_UP_POSITION = 180;     // Hand servo position for thumbs up
 const int THUMBS_DOWN_POSITION = 0;     // Hand servo position for thumbs down
 const int NEUTRAL_POSITION = 90;        // Hand servo neutral position
 
+// Display configuration
+const int DISPLAY_SYMBOL_SIZE = 16;
+
+// Calculate positions to center the symbols horizontally
+const int SCREEN_CENTER = 128 / 2;
+const int SYMBOL_SPACING = 30;  // Space between symbols
+const int FIRST_SYMBOL_X = SCREEN_CENTER - SYMBOL_SPACING - DISPLAY_SYMBOL_SIZE/2;
+const int SECOND_SYMBOL_X = SCREEN_CENTER - DISPLAY_SYMBOL_SIZE/2;
+const int THIRD_SYMBOL_X = SCREEN_CENTER + SYMBOL_SPACING - DISPLAY_SYMBOL_SIZE/2;
+
+
 // Function to initialize configuration
 void initConfig() {
   // Set pin modes
