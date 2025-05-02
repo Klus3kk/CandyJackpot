@@ -95,6 +95,7 @@ void loop() {
       if (millis() - stateStartTime > 500) {
         playWinAnimation();
         playWinSound();
+        activateDispenser();
         stateStartTime = millis();
         state = RESET;
       }
@@ -104,6 +105,7 @@ void loop() {
       if (millis() - stateStartTime > 500) {
         displayLoseMessage();
         playLoseSound();
+        //activateDispenser(); for testing
         stateStartTime = millis();
         state = RESET;
       }
