@@ -4,7 +4,7 @@
 
 // Pin Definitions
 const uint8_t buttonPin = 2;        // Button/lever detection
-const int speakerPin = 3;           // Sound output
+const uint8_t speakerPin = 3;           // Sound output
 const int dispenserServoPin = 9;    // Candy dispenser servo
 const int leverServoPin = 10;
 

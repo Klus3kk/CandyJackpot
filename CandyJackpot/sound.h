@@ -2,40 +2,38 @@
 #include "config.h"
 #include <Adafruit_SSD1306.h>
 
-static bool spinning = false;
-static unsigned long lastToneTime = 0;
-static int toneState = 0;  // 0: off, 1: on
-static int tonesLeft = 6;
+const int melody[] = { 440, 494, 523, 587, 659, 698, 784 };
+const int noteDuration = 120;  // ms
+const int numNotes = sizeof(melody) / sizeof(melody[0]);
+
+int currentNote = 0;
+unsigned long lastNoteTime = 0;
+bool spinning = false;
 
 void initSound() {
     pinMode(speakerPin, OUTPUT);
+    noTone(speakerPin);
 }
 
 void startSpinSound() {
+    currentNote = 0;
+    lastNoteTime = millis();
     spinning = true;
-    tonesLeft = 6;          // 3 bipy (on/off = 6 zmian)
-    lastToneTime = millis();
-    toneState = 0;
-}
-
+    tone(speakerPin, melody[currentNote]);
+  }
+  
 void updateSpinSound() {
     if (!spinning) return;
   
-    if (millis() - lastToneTime >= 100) {
-      if (toneState == 0) {
-        tone(speakerPin, 1000);
-        toneState = 1;
+    if (millis() - lastNoteTime >= noteDuration) {
+      currentNote++;
+      lastNoteTime = millis();
+  
+      if (currentNote < numNotes) {
+        tone(speakerPin, melody[currentNote]);
       } else {
         noTone(speakerPin);
-        toneState = 0;
-      }
-  
-      tonesLeft--;
-      lastToneTime = millis();
-  
-      if (tonesLeft <= 0) {
         spinning = false;
-        noTone(speakerPin);
       }
     }
 }
