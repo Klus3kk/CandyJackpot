@@ -7,93 +7,87 @@ extern int slotResults[3];
 extern const unsigned char* symbolBitmaps[];
 extern const int numSymbols;
 
-// Display configuration
-const int DISPLAY_SYMBOL_SIZE = 16;
-
-
 void displaySplashScreen() {
-  // This function shows the splash screen with CANDY JACKPOT centered
-  // and scrolling "PULL LEVER TO PLAY" text
-  
+  // First, just show the title without any scrolling text
   display.clearDisplay();
-  
-  // Title centered
-  display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
+  display.setTextSize(2);
   
-  // Calculate width of "CANDY" text (each char is ~12 pixels at size 2)
-  int titleWidth = 5 * 12; // "CANDY" has 5 characters
-  int startX = (128 - titleWidth) / 2;
-  display.setCursor(startX, 5);
-  display.println(F("CANDY"));
+  // Center "CANDY" and "JACKPOT"
+  int candyWidth = 5 * 12;
+  int candyX = (128 - candyWidth) / 2;
+  display.setCursor(candyX, 5);
+  display.print(F("CANDY"));
   
-  // Calculate width of "JACKPOT" text (7 characters)
-  titleWidth = 7 * 12;
-  startX = (128 - titleWidth) / 2;
-  display.setCursor(startX, 25);
-  display.println(F("JACKPOT"));
+  int jackpotWidth = 7 * 12;
+  int jackpotX = (128 - jackpotWidth) / 2;
+  display.setCursor(jackpotX, 25);
+  display.print(F("JACKPOT"));
   display.display();
   
-  // Pause to show the title long enough (but exit early if button is pressed)
+  // Wait a bit
   unsigned long startTime = millis();
   while (millis() - startTime < 3000) {
     if (digitalRead(buttonPin) == LOW) {
-      return; // Exit immediately if button is pressed
+      return;
     }
     delay(10);
   }
   
-  // Now add the scrolling text - continuous scrolling
-  display.setTextSize(1);
-  
+  // Now start the scrolling animation using drawChar instead of print
   const char* scrollText = "PULL LEVER TO PLAY";
-  int textWidth = strlen(scrollText) * 6; // Width of the text in pixels
+  int textLen = strlen(scrollText);
   
-  // Do continuous scrolling until button is pressed
+  // Start from off-screen right
+  int startPos = 128;
+  
+  // Keep scrolling until button press
   while (true) {
-    // Check for button press before starting a new cycle
     if (digitalRead(buttonPin) == LOW) {
-      return; // Exit immediately if button is pressed
+      return;
     }
     
-    // Scroll from right edge to left edge in one continuous motion
-    for (int i = 128; i > -textWidth; i--) {
-      // Check button during animation
-      if (digitalRead(buttonPin) == LOW) {
-        return; // Exit immediately if button is pressed
+    display.clearDisplay();
+    
+    // Draw fixed title
+    display.setTextSize(2);
+    display.setCursor(candyX, 5);
+    display.print(F("CANDY"));
+    display.setCursor(jackpotX, 25);
+    display.print(F("JACKPOT"));
+    
+    // Draw scrolling text - character by character to avoid line wrapping
+    display.setTextSize(1);
+    for (int i = 0; i < textLen; i++) {
+      int charX = startPos + (i * 6); // Each character is about 6 pixels wide at size 1
+      // Only draw characters that are on the screen
+      if (charX >= 0 && charX < 128) {
+        display.drawChar(charX, 50, scrollText[i], SSD1306_WHITE, SSD1306_BLACK, 1);
       }
-      
-      display.clearDisplay();
-      
-      // Redraw the title with each frame
-      display.setTextSize(2);
-      titleWidth = 5 * 12;
-      startX = (128 - titleWidth) / 2;
-      display.setCursor(startX, 5);
-      display.println(F("CANDY"));
-      
-      titleWidth = 7 * 12;
-      startX = (128 - titleWidth) / 2;
-      display.setCursor(startX, 25);
-      display.println(F("JACKPOT"));
-      
-      // Draw scrolling text
-      display.setTextSize(1);
-      display.setCursor(i, 50);
-      display.println(scrollText);
-      display.display();
-      delay(15);
+    }
+    
+    display.display();
+    
+    // Move text left
+    startPos -= 2;
+    
+    // Reset position when it's completely off-screen
+    if (startPos < -(textLen * 6)) {
+      startPos = 128;
+    }
+    
+    delay(15);
+    
+    // Check for button press again
+    if (digitalRead(buttonPin) == LOW) {
+      return;
     }
   }
-  
-  // We should never reach here since the loop is infinite
-  // and will only exit via the button press return statements
 }
 
 void initDisplay() {
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    // If display initialization fails, we should indicate this somehow
-    // For now, we'll just halt
+    // If display initialization fails, halt
     for(;;);
   }
   display.clearDisplay();
@@ -103,31 +97,30 @@ void initDisplay() {
   displaySplashScreen();
 }
 
-
+// All the rest of your functions, updated to use centered symbol positions
 void animateLeverPull() {
-  // Visual feedback for lever pull
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
-  // Center the text
   int textWidth = 10 * 6; // "Here we go!" is ~10 chars
   int startX = (128 - textWidth) / 2;
   display.setCursor(startX, 28);
-  display.println(F("Here we go!"));
+  display.print(F("Here we go!"));
   display.display();
-  delay(1000); // Longer pause
+  delay(1000);
 }
 
 void spinSlots() {
-  // Spin animation, fast changing symbols
   for (int i = 0; i < 15; i++) {
     display.clearDisplay();
     
-    // Randomize all slots
     for (int slot = 0; slot < 3; slot++) {
       int randomSymbol = random(numSymbols);
-      // Position each symbol in its own "screen" section
-      display.drawBitmap(10 + slot*40, 24, symbolBitmaps[randomSymbol], 
+      // Use centered positions
+      int xPos = (slot == 0) ? FIRST_SYMBOL_X : 
+                (slot == 1) ? SECOND_SYMBOL_X : THIRD_SYMBOL_X;
+      
+      display.drawBitmap(xPos, 24, symbolBitmaps[randomSymbol], 
                         DISPLAY_SYMBOL_SIZE, DISPLAY_SYMBOL_SIZE, SSD1306_WHITE);
     }
     
@@ -137,38 +130,38 @@ void spinSlots() {
 }
 
 void stopSlotSequentially() {
-  // Stop each slot one by one with animation
   for (int slot = 0; slot < 3; slot++) {
-    // Determine final result for this slot
     if (slot == 2 && slotResults[0] == slotResults[1]) {
-      // For the last slot, decide if we force a win (1 in 3 chance)
       if (random(3) == 0) {
         slotResults[2] = slotResults[0]; // Force win
       } else {
-        // Ensure no win by choosing a different symbol
         do {
           slotResults[2] = random(numSymbols);
         } while (slotResults[2] == slotResults[0]);
       }
     } else {
-      // Random result for other slots
       slotResults[slot] = random(numSymbols);
     }
     
-    // Spin a few more times before stopping
     for (int i = 0; i < 5; i++) {
       display.clearDisplay();
       
       // Draw stopped slots
       for (int j = 0; j <= slot; j++) {
-        display.drawBitmap(10 + j*40, 24, symbolBitmaps[slotResults[j]], 
+        int xPos = (j == 0) ? FIRST_SYMBOL_X : 
+                  (j == 1) ? SECOND_SYMBOL_X : THIRD_SYMBOL_X;
+                  
+        display.drawBitmap(xPos, 24, symbolBitmaps[slotResults[j]], 
                           DISPLAY_SYMBOL_SIZE, DISPLAY_SYMBOL_SIZE, SSD1306_WHITE);
       }
       
       // Draw spinning slots
       for (int j = slot + 1; j < 3; j++) {
         int randomSymbol = random(numSymbols);
-        display.drawBitmap(10 + j*40, 24, symbolBitmaps[randomSymbol], 
+        int xPos = (j == 0) ? FIRST_SYMBOL_X : 
+                  (j == 1) ? SECOND_SYMBOL_X : THIRD_SYMBOL_X;
+                  
+        display.drawBitmap(xPos, 24, symbolBitmaps[randomSymbol], 
                           DISPLAY_SYMBOL_SIZE, DISPLAY_SYMBOL_SIZE, SSD1306_WHITE);
       }
       
@@ -176,73 +169,169 @@ void stopSlotSequentially() {
       delay(100);
     }
     
-    delay(700); // Longer pause after each slot stops
+    delay(700);
   }
 }
 
 void displayResult() {
-  // Show final result on display
   display.clearDisplay();
   for (int slot = 0; slot < 3; slot++) {
-    display.drawBitmap(10 + slot*40, 24, symbolBitmaps[slotResults[slot]], 
+    int xPos = (slot == 0) ? FIRST_SYMBOL_X : 
+              (slot == 1) ? SECOND_SYMBOL_X : THIRD_SYMBOL_X;
+              
+    display.drawBitmap(xPos, 24, symbolBitmaps[slotResults[slot]], 
                       DISPLAY_SYMBOL_SIZE, DISPLAY_SYMBOL_SIZE, SSD1306_WHITE);
   }
   display.display();
 }
 
 bool checkWin() {
-  // Win if all three symbols match
   return (slotResults[0] == slotResults[1] && slotResults[1] == slotResults[2]);
 }
 
 void displayWinMessage() {
   display.clearDisplay();
   for (int slot = 0; slot < 3; slot++) {
-    display.drawBitmap(10 + slot*40, 24, symbolBitmaps[slotResults[slot]], 
+    int xPos = (slot == 0) ? FIRST_SYMBOL_X : 
+              (slot == 1) ? SECOND_SYMBOL_X : THIRD_SYMBOL_X;
+              
+    display.drawBitmap(xPos, 24, symbolBitmaps[slotResults[slot]], 
                       DISPLAY_SYMBOL_SIZE, DISPLAY_SYMBOL_SIZE, SSD1306_WHITE);
   }
   display.setTextSize(1);
-  // Center "WINNER!" text
   int textWidth = 7 * 6; // "WINNER!" is 7 chars
   int startX = (128 - textWidth) / 2;
   display.setCursor(startX, 45);
-  display.println(F("WINNER!"));
+  display.print(F("WINNER!"));
   display.display();
 }
 
 void displayLoseMessage() {
   display.clearDisplay();
   for (int slot = 0; slot < 3; slot++) {
-    display.drawBitmap(10 + slot*40, 24, symbolBitmaps[slotResults[slot]], 
+    int xPos = (slot == 0) ? FIRST_SYMBOL_X : 
+              (slot == 1) ? SECOND_SYMBOL_X : THIRD_SYMBOL_X;
+              
+    display.drawBitmap(xPos, 24, symbolBitmaps[slotResults[slot]], 
                       DISPLAY_SYMBOL_SIZE, DISPLAY_SYMBOL_SIZE, SSD1306_WHITE);
   }
   display.setTextSize(1);
-  // Center "TRY AGAIN!" text
   int textWidth = 10 * 6; // "TRY AGAIN!" is ~10 chars
   int startX = (128 - textWidth) / 2;
   display.setCursor(startX, 45);
-  display.println(F("TRY AGAIN!"));
+  display.print(F("TRY AGAIN!"));
   display.display();
 }
 
 void playWinAnimation() {
-  // Make winning symbols blink
-  for (int i = 0; i < 8; i++) { // More blinks
+  // Phase 1: Blinking symbols (faster)
+  for (int i = 0; i < 10; i++) {
     display.clearDisplay();
     
-    // Only draw on even iterations (creates blinking effect)
     if (i % 2 == 0) {
       for (int slot = 0; slot < 3; slot++) {
-        display.drawBitmap(10 + slot*40, 24, symbolBitmaps[slotResults[slot]], 
+        int xPos = (slot == 0) ? FIRST_SYMBOL_X : 
+                  (slot == 1) ? SECOND_SYMBOL_X : THIRD_SYMBOL_X;
+                  
+        display.drawBitmap(xPos, 24, symbolBitmaps[slotResults[slot]], 
                           DISPLAY_SYMBOL_SIZE, DISPLAY_SYMBOL_SIZE, SSD1306_WHITE);
       }
     }
     
     display.display();
-    delay(200);
+    delay(100); // Faster blinks
   }
   
-  // Show winner text
+  // Phase 2: "Bouncing" symbols
+  for (int bounce = 0; bounce < 3; bounce++) {
+    // Move up
+    for (int offset = 0; offset <= 10; offset += 2) {
+      display.clearDisplay();
+      for (int slot = 0; slot < 3; slot++) {
+        int xPos = (slot == 0) ? FIRST_SYMBOL_X : 
+                  (slot == 1) ? SECOND_SYMBOL_X : THIRD_SYMBOL_X;
+                  
+        display.drawBitmap(xPos, 24 - offset, symbolBitmaps[slotResults[slot]], 
+                          DISPLAY_SYMBOL_SIZE, DISPLAY_SYMBOL_SIZE, SSD1306_WHITE);
+      }
+      display.display();
+      delay(30);
+    }
+    
+    // Move down
+    for (int offset = 10; offset >= 0; offset -= 2) {
+      display.clearDisplay();
+      for (int slot = 0; slot < 3; slot++) {
+        int xPos = (slot == 0) ? FIRST_SYMBOL_X : 
+                  (slot == 1) ? SECOND_SYMBOL_X : THIRD_SYMBOL_X;
+                  
+        display.drawBitmap(xPos, 24 - offset, symbolBitmaps[slotResults[slot]], 
+                          DISPLAY_SYMBOL_SIZE, DISPLAY_SYMBOL_SIZE, SSD1306_WHITE);
+      }
+      display.display();
+      delay(30);
+    }
+  }
+  
+  // Phase 3: Growing/enlarging text effect
+  const char* winText = "WINNER!";
+  for (int size = 1; size <= 2; size++) {
+    display.clearDisplay();
+    
+    // Draw the symbols
+    for (int slot = 0; slot < 3; slot++) {
+      int xPos = (slot == 0) ? FIRST_SYMBOL_X : 
+                (slot == 1) ? SECOND_SYMBOL_X : THIRD_SYMBOL_X;
+                
+      display.drawBitmap(xPos, 24, symbolBitmaps[slotResults[slot]], 
+                        DISPLAY_SYMBOL_SIZE, DISPLAY_SYMBOL_SIZE, SSD1306_WHITE);
+    }
+    
+    // Draw text with increasing size
+    display.setTextSize(size);
+    int textWidth = strlen(winText) * 6 * size;
+    int startX = (128 - textWidth) / 2;
+    int startY = size == 1 ? 45 : 45;
+    display.setCursor(startX, startY);
+    display.print(winText);
+    display.display();
+    delay(500);
+  }
+  
+  // Final display with sparkles/stars
+  for (int i = 0; i < 10; i++) {
+    display.clearDisplay();
+    
+    // Draw the symbols
+    for (int slot = 0; slot < 3; slot++) {
+      int xPos = (slot == 0) ? FIRST_SYMBOL_X : 
+                (slot == 1) ? SECOND_SYMBOL_X : THIRD_SYMBOL_X;
+                
+      display.drawBitmap(xPos, 24, symbolBitmaps[slotResults[slot]], 
+                        DISPLAY_SYMBOL_SIZE, DISPLAY_SYMBOL_SIZE, SSD1306_WHITE);
+    }
+    
+    // Draw "WINNER!"
+    display.setTextSize(1);
+    int textWidth = 7 * 6;
+    int startX = (128 - textWidth) / 2;
+    display.setCursor(startX, 45);
+    display.print(F("WINNER!"));
+    
+    // Draw random sparkles
+    for (int stars = 0; stars < 5; stars++) {
+      int x = random(128);
+      int y = random(64);
+      display.drawPixel(x, y, SSD1306_WHITE);
+      display.drawPixel(x+1, y, SSD1306_WHITE);
+      display.drawPixel(x, y+1, SSD1306_WHITE);
+      display.drawPixel(x+1, y+1, SSD1306_WHITE);
+    }
+    
+    display.display();
+    delay(150);
+  }
+  
+  // Final win message
   displayWinMessage();
 }
-
