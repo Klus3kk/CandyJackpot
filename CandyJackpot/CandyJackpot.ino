@@ -9,6 +9,7 @@
 #include "lever.h"
 #include "sound.h"
 #include "dispenser.h"
+#include "hand.h"
 
 // Create display object
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
@@ -44,8 +45,8 @@ void setup() {
   initSound();
   
   // Commented out for initial testing
-  // initLever();
-  // initDispenser();
+  initHand();
+  initDispenser();
 }
 
 void loop() {
@@ -95,17 +96,18 @@ void loop() {
       if (millis() - stateStartTime > 500) {
         playWinAnimation();
         playWinSound();
-        activateDispenser();
+        thumbsUp();           // Show thumbs up with hand servo
+        activateDispenser();  // Dispense candy
         stateStartTime = millis();
         state = RESET;
       }
       break;
-
+    
     case LOSE:
       if (millis() - stateStartTime > 500) {
         displayLoseMessage();
         playLoseSound();
-        //activateDispenser(); for testing
+        thumbsDown();         // Show thumbs down with hand servo
         stateStartTime = millis();
         state = RESET;
       }
