@@ -1,0 +1,4 @@
+[wokwi]
+version = 1
+firmware = "build/CandyJackpot.ino.hex"
+elf = "build/CandyJackpot.ino.elf"

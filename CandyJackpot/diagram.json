@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "wokwi-ssd1306",
+      "id": "oled",
+      "top": -146.9,
+      "left": 529.9,
+      "attrs": { "address": "0x3C" }
+    },
+    {
+      "type": "wokwi-pushbutton-6mm",
+      "id": "btn",
+      "top": -40.6,
+      "left": 211.2,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": -112.8,
+      "left": 155.4,
+      "attrs": { "volume": "0.1" }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "servo1",
+      "top": 437.8,
+      "left": 87.4,
+      "rotate": 90,
+      "attrs": {}
+    },
+    { "type": "wokwi-servo", "id": "servo2", "top": 437.8, "left": 1, "rotate": 90, "attrs": {} }
+  ],
+  "connections": [
+    [ "btn:1.l", "uno:2", "green", [ "h0" ] ],
+    [ "btn:2.l", "uno:GND.1", "green", [ "h0" ] ],
+    [ "oled:DATA", "uno:A4", "green", [ "v0" ] ],
+    [ "oled:CLK", "uno:A5", "green", [ "v0" ] ],
+    [ "oled:DC", "uno:5V", "green", [ "v0" ] ],
+    [ "oled:GND", "uno:GND.2", "black", [ "v0" ] ],
+    [ "bz1:2", "uno:3", "red", [ "v0" ] ],
+    [ "bz1:1", "uno:GND.1", "black", [ "v0" ] ],
+    [ "servo1:GND", "uno:GND.3", "brown", [ "v0" ] ],
+    [ "servo1:V+", "uno:5V", "red", [ "v0" ] ],
+    [ "servo1:PWM", "uno:9", "orange", [ "v0" ] ],
+    [ "servo2:PWM", "uno:10", "green", [ "v0" ] ],
+    [ "servo2:V+", "uno:5V", "green", [ "v0" ] ],
+    [ "servo2:GND", "uno:GND.2", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}
