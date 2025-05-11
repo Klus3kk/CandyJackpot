@@ -16,7 +16,7 @@ Adafruit_SSD1306 display(128, 64, &Wire, -1);
 int slotResults[3];
 
 // Track if we're in splash screen mode
-//bool inSplashScreen = true;
+bool inSplashScreen = true;
 
 // State machine
 enum GameState {
@@ -51,7 +51,7 @@ void setup() {
 
 void loop() {
   // Update sound effects (needed for continuous sounds)
-  //updateSpinSound();
+  updateSpinSound();
   
   switch (state) {
     case SPLASH:
@@ -62,7 +62,7 @@ void loop() {
     case IDLE:
       if (buttonPressed()) {
         // When button is pressed, run the game
-        //startSpinSound();
+        startSpinSound();
         state = LEVER_ANIM;
         stateStartTime = millis();
       }
@@ -108,6 +108,7 @@ void loop() {
         displayLoseMessage();
         playLoseSound();
         thumbsDown();         // Show thumbs down with hand servo
+        activateDispenser();  // Dispense candy
         stateStartTime = millis();
         state = RESET;
       }
